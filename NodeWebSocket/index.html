@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="favicon.ico">
+
+    <title>Chat Tool</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+
+    <!-- Custom styles for this template -->
+    <style type="text/css">
+    	body {
+		  padding-top: 50px;
+		  margin-top:50px;
+		}
+		.black {
+			color:black;
+		}
+		.white {
+			color: white;
+		}
+		.blue {
+			color:blue;
+		}
+		.green {
+			color:green;
+		}
+		.red {
+			color: red;
+		}
+		.message {
+			padding: 10px 20px 10px 0px;
+			margin-bottom: 20px;
+			border-radius: 16px;
+		}
+		.chatMessage {
+			height: 55px;
+			padding-top: 10px;
+			padding-bottom: 10px;
+			/*margin-left: 20px;*/
+			border-radius: 10px;
+		}
+		.chatMessageOutgoing {
+			background-color: #f3f0ee;
+		}
+		.chatMessageIncoming {
+			background-color: #4c4fa5;
+		}
+		.imgDiv {
+			width: 20%
+		}
+		#output {
+			border: 1px #ccc groove;
+			height: 650px;
+			border-radius: 16px;
+			overflow-y: auto;
+		}
+		::-webkit-scrollbar {
+		    width: 12px;
+		}
+		 
+		::-webkit-scrollbar-track {
+		    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3); 
+		    border-radius: 10px;
+		}
+		 
+		::-webkit-scrollbar-thumb {
+		    border-radius: 10px;
+		    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5); 
+		}
+    </style>
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a id="usernameBrand" class="navbar-brand " href="#">Websocket</a>
+        </div>
+        <div id="navbar" class="collapse navbar-collapse navbar-right">
+          <ul class="nav navbar-nav">
+            <li class="active"><a id="chatText" href="#"></a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+      	
+		<div class="col-xs-12">
+			<div id="output" class="message"></div>
+		</div>
+		<div class="col-xs-12">
+			<form autocomplete="off" id="messageForm">
+		    	<p><input id="message" type="text" class="form-control" placeholder="Enter Chat Message" required /></p>
+		    	<p><button id="sendMessage" type="submit" class="btn btn-primary btn-lg btn-block">Send &raquo;</button></p>
+		    	<p id="userIsTyping"></p>
+	    	</form>
+		</div>
+
+		<div id="usernameModal" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
+		  <div class="modal-dialog" role="document">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <h3 class="modal-title">Enter Username</h3>
+		        
+		      </div>
+		      <div class="modal-body">
+		      	<form id="newUserForm" name="newUserForm">
+		        	<p>
+		        		<input required class="form-control" type="text" name="usernameInput" id="usernameInput" placeholder="Enter Username" maxlength="50">
+		        	</p>
+		        	<p>
+		        		<select id="chatID" required class="form-control">
+		        			<option value="">Select a Chat Group</option>
+		        			<option value="1">Sports</option>
+		        			<option value="2">Movies</option>
+		        		</select>
+		        	</p>
+		    	</form>
+		      </div>
+		      <div class="modal-footer">
+		        <button form="newUserForm" id="saveUsername" type="submit" class="btn btn-primary">Save</button>
+		      </div>
+		    </div>
+		  </div>
+		</div>
+    </div><!-- /.container -->
+
+
+    <template id="messageTemplate">
+    	<div class="row" style="margin-top:15px;">
+	    	<div class="col-xs-10 {{type}}">
+	    		<div class="col-xs-4 col-md-1">
+	    			<img src="https://via.placeholder.com/55?text={{initial}}"/>
+	    		</div>
+	    		<div class="col-xs-8 col-md-11 chatMessage {{chatClass}} {{color}}"> {{message}}</div>
+	    		<p class="col-xs-12">{{currentDate}}</p>
+	    	</div>
+    	</div>
+    </template>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.1.2/handlebars.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+    <script language="javascript" type="text/javascript">
+
+
+    	Handlebars.registerHelper('currentDate', function() {
+    		var today = new Date();
+			var dd = today.getDate();
+			var mm = today.getMonth() + 1; //January is 0!
+			var yyyy = today.getFullYear();
+			var hh = today.getHours();
+			var nn = today.getMinutes();
+			var ss = today.getSeconds();
+			var tt = "am";
+
+			if (ss < 10) {
+			  ss = '0' + ss;
+			}
+			if (nn < 10) {
+			  nn = '0' + nn;
+			}
+			if (dd < 10) {
+			  dd = '0' + dd;
+			}
+			if (mm < 10) {
+			  mm = '0' + mm;
+			}
+			if (hh>=13) {
+				hh-=12;
+				tt="pm";
+			}
+			if (hh<10) {
+				hh="0"+hh;
+			}
+
+			today = mm + '/' + dd + '/' + yyyy + ' ' + hh+':'+nn+':'+ss + ' '+tt;
+  			return today;
+		});
+
+
+        var wsUri = "ws://localhost:5001";
+        var counter = 0;
+        var username = sessionStorage.username;
+        var chatidvalue = sessionStorage.chatid;
+        var message = $("#message"),
+            output = $("#output"),
+            usernameBrand = $("#usernameBrand"),
+            sendMessage = $("#sendMessage"),
+            messageForm = $("#messageForm"),
+            usernameModal = $("#usernameModal"),
+            saveUsername = $("#saveUsername"),
+            usernameInput = $("#usernameInput"),
+            chatID = $("#chatID"),
+            chatText = $("#chatText"),
+            newUserForm = $("#newUserForm"),
+            messageTemplate = $("#messageTemplate"),
+            userIsTyping = $("#userIsTyping");
+
+        var isTyping = 0;
+
+        function init() {
+            testWebSocket();
+            messageForm.submit(function (event) {
+            	event.preventDefault();
+            	var obj = { eventname: "chatmessage",chatid:sessionStorage.chatid, payload: { username: username, message:message.val() } };
+                doSend(obj);
+                sendTypingMessage("");
+                message.val("");
+                var context = {
+	        		message: obj.payload.message, 
+	        		color: "black",
+	        		initial:"You",
+	        		chatClass:"chatMessageOutgoing",
+	        		type:""
+	        	};
+            	addToChat(context);
+            });
+
+            message.on("input",function(){
+            	if (!isTyping) {
+            		sendTypingMessage(username+" is typing...")
+            		isTyping=1;
+            		setTimeout(function() {
+            			isTyping = 0;
+            			sendTypingMessage("");
+            		},5000);
+            	}
+            });
+
+            if (!sessionStorage.username) {
+            	usernameModal.modal();
+            	newUserForm.submit(function(event) {
+            		username = sessionStorage.username = usernameInput.val();
+            		chatidvalue = sessionStorage.chatid = chatID.val();
+            		chatText.text(chatID.find(":selected").text());
+            		if(username.trim().length) {
+            			usernameModal.modal("hide");
+            			var obj = { eventname: "newuser",chatid:chatidvalue, payload: { username: username, message:username + " joined the chat." } };
+                		doSend(obj);
+                		usernameBrand.text(username);
+            		}
+            		event.preventDefault();
+            	});
+            }
+            else {
+
+            }
+
+        }
+
+        function testWebSocket() {
+            websocket = new WebSocket(wsUri);
+            websocket.onopen = function (evt) { onOpen(evt) };
+            websocket.onclose = function (evt) { onClose(evt) };
+            websocket.onmessage = function (evt) { onMessage(evt) };
+            websocket.onerror = function (evt) { onError(evt) };
+        }
+
+        function onOpen(evt) {
+            if (sessionStorage.username) {
+            	chatID.val(chatidvalue);
+            	chatText.text(chatID.find(":selected").text());
+            	var obj = { eventname: "newuser",chatid:chatidvalue, payload: { username: username, message:username + " joined the chat." } };
+            	doSend(obj);
+            	usernameBrand.text(username);
+            	var context = {
+	        		message: "You are connected", 
+	        		color: "black",
+	        		initial:"You",
+	        		chatClass:"chatMessageOutgoing",
+	        		type:""
+	        	};
+            	addToChat(context);
+        	}
+        }
+
+        function onClose(evt) {
+        }
+
+        function onMessage(evt) {
+        	var data = JSON.parse(evt.data);
+        	console.log(data)
+        	if ("chatmessage" == data.eventname) {
+	        	var context = {
+	        		message: data.message, 
+	        		color: "white",
+	        		initial:data.initial.toUpperCase(),
+	        		chatClass:"chatMessageIncoming",
+	        		type:"pull-right"
+	        	};
+	            addToChat(context);
+	        }
+	        if ("typing" == data.eventname) {
+	        	userIsTyping.text(data.message);
+	        }
+	        if ("newuser" == data.eventname) {
+	        	var context = {
+	        		message: data.message, 
+	        		color: "white",
+	        		initial:data.initial.toUpperCase(),
+	        		chatClass:"chatMessageIncoming",
+	        		type:"pull-right"
+	        	};
+	            addToChat(context);
+	        }
+        }
+
+        function onError(evt) {
+        	console.log("ERROR: ");
+            console.log(evt.data);
+        }
+
+        function doSend(data) {
+            websocket.send(JSON.stringify(data));
+        }
+
+        function addToChat(context) {
+            var source 		= messageTemplate.html();
+            var template 	= Handlebars.compile(source);
+            var html   		= template(context);    
+            output.append(html).show();
+            output.scrollTop(output[0].scrollHeight);
+        }
+
+        function sendTypingMessage(message) {
+        	var obj = { eventname: "typing",chatid:sessionStorage.chatid, payload: { username: username, message:message } }
+            doSend(obj);
+        }
+
+        $(init);
+
+    </script>
+  </body>
+</html>
