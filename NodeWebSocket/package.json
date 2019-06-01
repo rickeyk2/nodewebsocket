@@ -1,0 +1,11 @@
+{
+  "name": "nodewebsocket",
+  "version": "1.0.0",
+  "description": "Node Web Socket Test",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app"
+  },
+  "author": "Rickey",
+  "license": "ISC"
+}
