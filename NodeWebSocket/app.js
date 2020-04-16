@@ -1,5 +1,7 @@
 const WebSocket = require('ws');
-const wss = new WebSocket.Server({ port: 5001 });
+const portNumber = process.env.port || 5001;
+
+const wss = new WebSocket.Server({ port: portNumber });
  
 const https = require('https');
  
